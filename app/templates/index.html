@@ -1,0 +1,90 @@
+{% extends 'layout/base.html' %}
+
+{% block title %}Danh sách lớp{% endblock %}
+
+<!-- thêm dữ liệu vào vùng content của base.html -->
+{% block content %}
+    <div class="card shadow-sm border-0">
+        <div class="card-header bg-white pb-0 d-flex justify-content-between align-items-center">
+            <h5 class="mt-2">Quản lý danh sách trẻ</h5>
+            <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addStudentModal">
+                <i class="fas fa-plus"></i> Thêm học sinh
+            </button>
+        </div>
+        <div class="card-body">
+            <table class="table table-bordered table-hover mt-2">
+                <thead class="table-light">
+                <tr>
+                    <th>STT</th>
+                    <th>Mã HS</th>
+                    <th>Họ tên trẻ</th>
+                    <th>Ngày sinh</th>
+                    <th>Giới tính</th>
+                    <th>Phụ huynh</th>
+                </tr>
+                </thead>
+                <tbody>
+                <!-- Vòng lặp -->
+                {% for p in students %}
+                    <tr>
+                        <td>{{ loop.index }}</td>
+                        <td><span class="badge bg-secondary">{{ p.id }}</span></td>
+                        <td>{{ p.name }}</td>
+                        <td>{{ p.dob }}</td>
+                        <td>{{ p.gender }}</td>
+                        <td>{{ p.parent_name }}</td>
+                        <td>
+                            <a href="/delete-student/{{ p.id }}" class="btn btn-danger btn-sm"
+                               onclick="return confirm('Bạn có chắc chắn muốn xóa học sinh {{ p.name }} không?');">
+                                <i class="fas fa-trash"></i> Xóa
+                            </a>
+                        </td>
+                    </tr>
+                    </td>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <!-- Form thêm học sinh -->
+    <div class="modal fade" id="addStudentModal" tabindex="-1" aria-labelledby="addStudentModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title" id="addStudentModalLabel">Thêm Học Sinh Mới</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                            aria-label="Close"></button>
+                </div>
+
+                <form action="/add-student" method="POST">
+                    <div class="modal-body">
+                        <div class="">
+                            <label class="form-label">Họ tên trẻ</label>
+                            <input type="text" class="form-control" name="name" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Ngày sinh</label>
+                            <!-- Type date sẽ hiển thị bộ chọn lịch -->
+                            <input type="date" class="form-control" name="dob" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Giới tính</label>
+                            <select class="form-select" name="gender">
+                                <option value="Nam">Nam</option>
+                                <option value="Nữ">Nữ</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Họ tên phụ huynh</label>
+                            <input type="text" class="form-control" name="parent_name" required>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                        <button type="submit" class="btn btn-primary">Lưu thông tin</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}
