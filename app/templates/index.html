@@ -6,7 +6,7 @@
 {% block content %}
     <div class="card shadow-sm border-0">
         <div class="card-header bg-white pb-0 d-flex justify-content-between align-items-center">
-            <h5 class="mt-2">Quản lý danh sách trẻ</h5>
+            <h5 class="mt-2 fw-bold">Quản lý danh sách trẻ</h5>
             <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addStudentModal">
                 <i class="fas fa-plus"></i> Thêm học sinh
             </button>
@@ -21,6 +21,7 @@
                     <th>Ngày sinh</th>
                     <th>Giới tính</th>
                     <th>Phụ huynh</th>
+                    <th>Số điện thoại</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -28,11 +29,15 @@
                 {% for p in students %}
                     <tr>
                         <td>{{ loop.index }}</td>
-                        <td><span class="badge bg-secondary">{{ p.id }}</span></td>
+                        <td>{{ p.id }}</td>
                         <td>{{ p.name }}</td>
-                        <td>{{ p.dob }}</td>
+                        <td>
+                            {% set d = p.dob.split('-') %}
+                            {{ d[2] }}/{{ d[1] }}/{{ d[0] }}
+                        </td>
                         <td>{{ p.gender }}</td>
                         <td>{{ p.parent_name }}</td>
+                        <td>{{ p.phone }}</td>
                         <td>
                             <a href="/delete-student/{{ p.id }}" class="btn btn-danger btn-sm"
                                onclick="return confirm('Bạn có chắc chắn muốn xóa học sinh {{ p.name }} không?');">
@@ -40,14 +45,13 @@
                             </a>
                         </td>
                     </tr>
-                    </td>
                 {% endfor %}
                 </tbody>
             </table>
         </div>
     </div>
     <!-- Form thêm học sinh -->
-    <div class="modal fade" id="addStudentModal" tabindex="-1" aria-labelledby="addStudentModalLabel" aria-hidden="true">
+    <div class="modal fade" id="addStudentModal" tabindex="-1">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header bg-primary text-white">
@@ -63,9 +67,9 @@
                             <input type="text" class="form-control" name="name" required>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label">Ngày sinh</label>
+                            <label class="form-label">Ngày sinh (lưu ý định dạng)</label>
                             <!-- Type date sẽ hiển thị bộ chọn lịch -->
-                            <input type="date" class="form-control" name="dob" required>
+                            <input type="date" class="form-control" name="dob" placeholder="dd/MM/yyyy" required>
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Giới tính</label>
@@ -77,6 +81,10 @@
                         <div class="mb-3">
                             <label class="form-label">Họ tên phụ huynh</label>
                             <input type="text" class="form-control" name="parent_name" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Số điện thoại</label>
+                            <input type="number" class="form-control" name="phone" required>
                         </div>
                     </div>
                     <div class="modal-footer">

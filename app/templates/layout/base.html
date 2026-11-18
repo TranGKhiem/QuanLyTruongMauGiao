@@ -18,34 +18,33 @@
 </head>
 <body>
     <div id="wrapper">
-        <!-- Sidebar Menu bên trái -->
+        <!-- Sidebar Menu -->
         <nav id="sidebar">
             <div class="sidebar-header p-3 text-center border-bottom border-secondary">
                 <h5 class="m-0 fw-bold text-uppercase text-light">Mẫu Giáo App</h5>
             </div>
             <ul class="nav flex-column mt-3">
-                <li class="nav-item"><a href="/" class="nav-link active"><i class="fas fa-users me-2"></i> Danh sách lớp</a></li>
-                <li class="nav-item"><a href="#" class="nav-link"><i class="fas fa-heartbeat me-2"></i> Sức khoẻ</a></li>
-                <li class="nav-item"><a href="#" class="nav-link"><i class="fas fa-file-invoice-dollar me-2"></i> Thu học phí</a></li>
-                <li class="nav-item"><a href="#" class="nav-link"><i class="fas fa-chart-pie me-2"></i> Báo cáo - Thống kê</a></li>
-                <li class="nav-item"><a href="#" class="nav-link"><i class="fas fa-cogs me-2"></i> Cài đặt quy định</a></li>
+                <li class="nav-item"><a href="/" class="nav-link {%if request.path=='/'%}active{%endif%}"><i class="fas fa-users me-2"></i>Danh sách lớp</a></li>
+                <li class="nav-item"><a href="/health" class="nav-link {%if request.path=='/health'%}active{%endif%}"><i class="fas fa-heartbeat me-2"></i>Sức khoẻ</a></li>
+                <li class="nav-item"><a href="#" class="nav-link"><i class="fas fa-file-invoice-dollar me-2"></i>Thu học phí</a></li>
+                <li class="nav-item"><a href="#" class="nav-link"><i class="fas fa-chart-pie me-2"></i>Báo cáo - Thống kê</a></li>
+                <li class="nav-item"><a href="#" class="nav-link"><i class="fas fa-cogs me-2"></i>Cài đặt quy định</a></li>
             </ul>
         </nav>
 
-        <!-- Vùng nội dung bên phải -->
+        <!-- vùng nội dung chính-->
         <div id="page-content-wrapper">
 
-            <!-- 1. GỌI HEADER TỪ FILE RIÊNG -->
+            <!--HEADER-->
             {% include 'layout/header.html' %}
 
-            <!-- 2. VÙNG NỘI DUNG ĐỘNG CỦA TỪNG TRANG -->
             <div class="container-fluid px-4 pt-4 main-content">
                 {% block content %}
-                <!-- Nội dung các trang con sẽ tự động đổ vào đây -->
+
                 {% endblock %}
             </div>
 
-            <!-- 3. GỌI FOOTER TỪ FILE RIÊNG -->
+            <!--FOOTER-->
             {% include 'layout/footer.html' %}
 
         </div>
