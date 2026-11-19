@@ -28,7 +28,19 @@ def delete_student_route(student_id):
 
 @app.route("/health")
 def health():
-    return render_template("health.html")
+    students_list = dao.get_all_students()
+    return render_template("health.html", students=students_list)
+
+
+@app.route('/save-all-health', methods=['POST'])
+def save_all_health():
+    record_date = request.form.get('record_date')
+    student_ids = request.form.getlist('student_id[]')
+    weights = request.form.getlist('weight[]')
+    temperatures = request.form.getlist('temperature[]')
+
+    dao.add_health_record(student_ids, record_date, weights, temperatures)
+    return redirect('/health')  # Chuyển hướng lại về trang sức khỏe
 
 if __name__=="__main__":
     app.run(debug=True)
