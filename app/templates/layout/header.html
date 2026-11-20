@@ -2,8 +2,26 @@
     <div class="d-flex align-items-center">
         <h4 class="m-0 text-dark">Hệ thống quản lý trường mẫu giáo</h4>
     </div>
+    {%if current_user.is_authenticated%}
 
     <div class="ms-auto d-flex align-items-center">
-        <button class="btn text-white" style="background-color: #333333;"><a class="nav-link" href="/login">Đăng Nhập</a></button>
+        <span class="me-3 d-flex align-items-center">
+            {% if current_user.role.name == 'ADMIN' %}
+                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRXKjCiUytjaGFQnymceKNF6lgCC-bxnAdvCLsEGBdkv7unUtLaBY45xag&s=10" width="30"
+                     class="me-2 rounded-circle" alt="admin-avatar">
+            {% else %}
+                <img src="https://www.pngall.com/wp-content/uploads/17/Frutiger-Aero-Minimalist-Typographic-Approach-PNG.png"
+                     width="30" class="me-2 rounded-circle" alt="user-avatar">
+            {% endif %}
+                <strong> Xin chào, {{current_user.name}}</strong>
+        </span>
+        <button class="btn text-white" style="background-color: #333333;"><a class="nav-link" href="/logout">
+            &#128275; Đăng xuất</a></button>
     </div>
+    {%else%}
+    <div class="ms-auto d-flex align-items-center">
+        <button class="btn text-white" style="background-color: #333333;"><a class="nav-link" href="/login">
+            &#128274; Đăng Nhập</a></button>
+    </div>
+    {%endif%}
 </nav>

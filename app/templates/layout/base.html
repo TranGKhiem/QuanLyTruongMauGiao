@@ -26,9 +26,9 @@
             <ul class="nav flex-column mt-3">
                 <li class="nav-item"><a href="/" class="nav-link {%if request.path=='/'%}active{%endif%}"><i class="fas fa-users me-2"></i>Danh sách lớp</a></li>
                 <li class="nav-item"><a href="/health" class="nav-link {%if request.path=='/health'%}active{%endif%}"><i class="fas fa-heartbeat me-2"></i>Sức khoẻ</a></li>
-                <li class="nav-item"><a href="#" class="nav-link"><i class="fas fa-file-invoice-dollar me-2"></i>Thu học phí</a></li>
-                <li class="nav-item"><a href="#" class="nav-link"><i class="fas fa-chart-pie me-2"></i>Báo cáo - Thống kê</a></li>
-                <li class="nav-item"><a href="#" class="nav-link"><i class="fas fa-cogs me-2"></i>Cài đặt quy định</a></li>
+                <li class="nav-item"><a href="/fee" class="nav-link {%if request.path=='/fee'%}active{%endif%}"><i class="fas fa-file-invoice-dollar me-2"></i>Thu học phí</a></li>
+                <li class="nav-item"><a href="/statistics" class="nav-link {%if request.path=='/statistic'%}active{%endif%}"><i class="fas fa-chart-pie me-2"></i>Báo cáo - Thống kê</a></li>
+                <li class="nav-item"><a href="/setting" class="nav-link {%if request.path=='/setting'%}active{%endif%}"><i class="fas fa-cogs me-2"></i>Cài đặt quy định</a></li>
             </ul>
         </nav>
 

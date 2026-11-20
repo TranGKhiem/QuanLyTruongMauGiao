@@ -1,10 +1,30 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, Float
+from sqlalchemy import Column, Integer, String, ForeignKey, Float, Enum
 from sqlalchemy.orm import relationship
 from app import app, db
+from enum import Enum as RoleEnum
+from flask_login import UserMixin
 
 
+# Data login
+class UserRole(RoleEnum):
+    USER = 1
+    ADMIN = 2
+
+class User(db.Model, UserMixin):
+    __tablename__ = 'user'
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    name = Column(String(50), nullable=False)
+    username = Column(String(50), nullable=False, unique=True)
+    password = Column(String(100), nullable=False)
+    role = Column(Enum(UserRole), nullable=False, default=UserRole.USER)
+
+    def __str__(self):
+        return self.name
+
+# Data danh sách lớp
 class Student(db.Model):
-    __tablename__ = 'student'  # Đặt tên bảng trong MySQL
+    __tablename__ = 'student'
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(50), nullable=False)
@@ -13,9 +33,11 @@ class Student(db.Model):
     parent_name = Column(String(50), nullable=False)
     phone=Column(String(20), nullable=False)
 
+    health_records = relationship('Health', backref='student', lazy=True)
     def __str__(self):
         return self.name
 
+#Data sức khỏe
 class Health(db.Model):
     __tablename__ = 'health'
     id = Column(Integer, primary_key=True, autoincrement=True)
@@ -24,6 +46,7 @@ class Health(db.Model):
     weight = Column(Float, nullable=False)
     temperature = Column(Float, nullable=False)
     note=Column(String(50), default='Bình Thường')
+
 
 if __name__ == "__main__":
     with app.app_context():
