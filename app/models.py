@@ -10,6 +10,8 @@ class Rules(db.Model):
     __tablename__ = 'rules'
     id = Column(Integer, primary_key=True, autoincrement=True)
     max_students = Column(Integer, nullable=False, default=25)
+    tuition_fee = Column(Integer, nullable=False, default=1500000)
+    meal_fee = Column(Integer, nullable=False, default=25000)
 
 # Data login
 class UserRole(RoleEnum):
@@ -56,6 +58,7 @@ class Classroom(db.Model):
     name = Column(String(20), nullable=False, unique=True)
 
     teachers = relationship('User', backref='classroom', lazy=True)
+    students = relationship('Student', backref='classroom', lazy=True)
 
     def __str__(self):
         return self.name

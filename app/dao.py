@@ -83,18 +83,50 @@ def add_health_record(student_id, record_date, weight, temperatures):
                     temperature=temperature_val,
                     note=note_val
                 )
-            db.session.add(record)
+                db.session.add(record)
     db.session.commit()
 
+def get_fee_list(month, year, current_user):
+    r = Rules.query.first()
+    tuition_fee = r.tuition_fee if r else 1500000
+    meal_fee = r.meal_fee if r else 25000
+
+    if current_user.role == UserRole.ADMIN:
+        students = Student.query.all()
+    else:
+        students = Student.query.filter(Student.user_id == current_user.id).all()
+
+    month_str = f"{year}-{str(month).zfill(2)}"
+    fee_list = []
+
+    for s in students:
+        days_attended = Health.query.filter(
+            Health.student_id == s.id,
+            Health.record_date.startswith(month_str)
+        ).count()
+
+        total_meal_fee = days_attended * meal_fee
+        total_fee = tuition_fee + total_meal_fee
+
+        fee_list.append({
+            'student_id': s.id,
+            'name': s.name,
+            'classroom': s.classroom.name,
+            'days_attended': days_attended,
+            'tuition_fee': tuition_fee,
+            'total_meal_fee': total_meal_fee,
+            'total_fee': total_fee
+        })
+    return fee_list
 
 if __name__ == "__main__":
     with app.app_context():
         # Test tạo user
         # add_user(name="Quản Trị Viên", username="admin", password="123", role=UserRole.ADMIN)
-
+        #
         # c1 = add_classroom(name="Mầm 1")
         # c2 = add_classroom(name="Chồi 1")
-
+        #
         # add_user(name="Cô Lan", username="gv1", password="123", role=UserRole.USER, classroom_id=c1.id)
         # add_user(name="Cô Mai", username="gv2", password="123", role=UserRole.USER, classroom_id=c2.id)
         print("Tạo Thành Công")

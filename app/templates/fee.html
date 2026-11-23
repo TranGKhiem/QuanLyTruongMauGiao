@@ -3,5 +3,198 @@
 {% block title %}Thu học phí{% endblock %}
 
 {% block content %}
+<div class="row g-3 mb-4">
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm p-3 rounded-3">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <div class="small">Học phí cơ bản / tháng</div>
+                    <div class="fs-4 fw-bold mt-1">{{ "{:,.0f}".format(tuition_fee) }} đ</div>
+                </div>
+                <div class="fs-1 text-white-50"><i class="fas fa-university"></i></div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm p-3 rounded-3">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <div class="small">Đơn giá tiền bán trú / ngày</div>
+                    <div class="fs-4 fw-bold mt-1">{{ "{:,.0f}".format(meal_fee) }} đ</div>
+                </div>
+                <div class="fs-1 text-white-50"><i class="fas fa-utensils"></i></div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm p-3 rounded-3">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    {% if current_user.is_authenticated and current_user.role.name == 'USER' %}
+                    <div class="small">Tổng thu lớp hiện tại</div>
+                    <div class="fs-4 fw-bold mt-1 text-danger" id="grandTotalDisplay">
+                        {{ "{:,.0f}".format(fee_list | sum(attribute='total_fee')) }} đ
+                    </div>
+                    {% else %}
+                    <div class="small">Tổng thu toàn trường</div>
+                    <div class="fs-4 fw-bold mt-1 text-danger" id="grandTotalDisplay">
+                        {{ "{:,.0f}".format(fee_list | sum(attribute='total_fee')) }} đ
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="fs-1 text-white-50"><i class="fas fa-calculator"></i></div>
+            </div>
+        </div>
+    </div>
+</div>
 
+<div class="card shadow-sm border-0">
+    <div class="card-header bg-white pb-0 d-flex justify-content-between align-items-center">
+        <h5 class="mt-2 fw-bold">Quản lý thu học phí hằng tháng</h5>
+        <form action="/fee" method="GET" class="d-flex gap-2 align-items-center" id="feeForm">
+            <input type="month" class="form-control form-control-sm" name="month_year"
+                   value="{{ selected_month_year }}" onchange="document.getElementById('feeForm').submit();">
+            <span class="fs-6 text-nowrap">
+                Lớp: <strong
+                    class="Bold">{{ current_user.classroom.name if current_user.classroom else 'Tất cả' }}</strong>
+            </span>
+        </form>
+
+    </div>
+    <div class="card-body">
+        <table class="table table-bordered table-hover mt-2">
+            <thead class="table-light">
+            <tr>
+                <th>STT</th>
+                <th>Họ tên trẻ</th>
+                <th>Học phí</th>
+                <th>Số ngày đi học</th>
+                <th>Tiền bán trú</th>
+                <th>Tổng tiền thanh toán</th>
+                <th>Xuất hóa đơn</th>
+            </tr>
+            </thead>
+
+            <tbody>
+            {% for fee in fee_list %}
+            <tr>
+                <td>{{ loop.index }}</td>
+                <td>{{ fee.name }}</td>
+                <!-- Dùng format để format số tiền có dấu phẩy: 1,500,000 -->
+                <td>{{ "{:,.0f}".format(fee.tuition_fee) }} đ</td>
+                <td>{{ fee.days_attended }}</td>
+                <td>{{ "{:,.0f}".format(fee.total_meal_fee) }} đ</td>
+                <td class="text-danger fw-bold">{{ "{:,.0f}".format(fee.total_fee) }} đ</td>
+                <td>
+                    <button class="btn btn-primary btn-sm"
+                            data-bs-toggle="modal"
+                            data-bs-target="#printModal"
+                            data-name="{{ fee.name }}"
+                            data-classroom="{{ fee.classroom }}"
+                            data-tuition="{{ '{:,.0f}'.format(fee.tuition_fee) }}"
+                            data-days="{{ fee.days_attended }}"
+                            data-meal="{{ '{:,.0f}'.format(fee.total_meal_fee) }}"
+                            data-total="{{ '{:,.0f}'.format(fee.total_fee) }}"
+                            onclick="loadPrintData(this)">
+                        <i class="fas fa-print"></i> In HĐ
+                    </button>
+                </td>
+            </tr>
+
+            {% else %}
+            <tr>
+                <td colspan="7" class="text-center text-muted">Không có dữ liệu trong tháng này.</td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+<div class="modal fade" id="printModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white d-print-none">
+                <h5 class="modal-title">Hóa đơn học phí - <span id="modalTitleName"></span></h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+            </div>
+
+            <div class="modal-body print-area">
+                <div class="text-center mb-4">
+                    <h4 class="fw-bold">TRƯỜNG MẦM NON</h4>
+                    <h3 class="fw-bold mt-3">PHIẾU THU HỌC PHÍ</h3>
+                    <p class="mb-0">
+                        Tháng:
+                        {% set m = selected_month_year.split('-') %}
+                        {{ m[1] }}
+                    </p>
+                </div>
+
+                <div class="mb-3 row">
+                    <div class="col-8"><strong>Họ và tên học sinh:</strong> <span id="printName"></span></div>
+                    <div class="col-4"><strong>Lớp:</strong> <span id="printClassroom"></span></div>
+                </div>
+
+                <table class="table table-bordered border-dark">
+                    <thead class="table-light text-center">
+                    <tr>
+                        <th>STT</th>
+                        <th>Khoản thu</th>
+                        <th>Thành tiền</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <td class="text-center">1</td>
+                        <td>Học phí cơ bản</td>
+                        <td class="text-end"><span id="printTuition"></span> đ</td>
+                    </tr>
+                    <tr>
+                        <td class="text-center">2</td>
+                        <td>Tiền ăn bán trú (<span id="printDays"></span> ngày)</td>
+                        <td class="text-end"><span id="printMeal"></span> đ</td>
+                    </tr>
+                    </tbody>
+                    <tfoot>
+                    <tr>
+                        <th colspan="2" class="text-end">TỔNG CỘNG:</th>
+                        <th class="text-end text-danger fs-5"><span id="printTotal"></span> đ</th>
+                    </tr>
+                    </tfoot>
+                </table>
+
+                <div class="row mt-5 text-center">
+                    <div class="col-6">
+                        <strong>Người nộp tiền</strong><br>
+                        <small>(Ký, ghi rõ họ tên)</small>
+                    </div>
+                    <div class="col-6">
+                        <strong>Người thu tiền</strong><br>
+                        <small>(Ký, ghi rõ họ tên)</small>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer d-print-none">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                <button type="button" class="btn btn-primary" onclick="window.print()">
+                    <i class="fas fa-print"></i> Xác nhận
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function loadPrintData(btn) {
+        // Lấy dữ liệu từ nút bấm
+        document.getElementById('modalTitleName').innerText = btn.getAttribute('data-name');
+        document.getElementById('printName').innerText = btn.getAttribute('data-name');
+        document.getElementById('printClassroom').innerText = btn.getAttribute('data-classroom');
+        document.getElementById('printTuition').innerText = btn.getAttribute('data-tuition');
+        document.getElementById('printDays').innerText = btn.getAttribute('data-days');
+        document.getElementById('printMeal').innerText = btn.getAttribute('data-meal');
+        document.getElementById('printTotal').innerText = btn.getAttribute('data-total');
+    }
+</script>
 {% endblock %}
