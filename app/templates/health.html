@@ -3,80 +3,87 @@
 {% block title %}Sức Khỏe{% endblock %}
 
 {% block content %}
-    <div class="card shadow-sm border-0">
-        <div class="card-header bg-white pb-0 d-flex justify-content-between align-items-center">
-            <h5 class="mt-2 fw-bold">Ghi nhận sức khỏe hằng ngày</h5>
-        </div>
-        <form action="/save-all-health" method="POST" onsubmit="return confirm('Xác nhận lưu thông tin sức khỏe của học sinh trong ngày hôm nay?');">
-            <div class="row p-3 align-items-end">
-                <div class="col-md-4">
-                    <label for="recordDate" class="form-label fw-semibold text-muted mb-2">Ngày ghi nhận</label>
-                    <input type="date" class="form-control" id="recordDate" name="record_date" required>
-                </div>
-                <div class="col-md-7 text-end">
-                    <button type="submit" class="btn btn-success px-4" id="btnSaveAll">
-                        <i class="fas fa-save me-1"></i> Lưu thông tin
-                    </button>
-                </div>
-            </div>
-            <div class="card-body">
-                <table class="table table-bordered table-hover mt-2">
-                    <thead class="table-light">
-                    <tr>
-                        <th>STT</th>
-                        <th>Họ tên trẻ</th>
-                        <th>Cân nặng (kg)</th>
-                        <th>Nhiệt độ</th>
-                        <th>Ghi chú</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    <!-- Vòng lặp -->
-                    {% for p in students %}
-                        <tr>
-                            <td>{{ loop.index }}</td>
-                            <td>
-                                {{ p.name }}
-                                <input type="hidden" name="student_id[]" value="{{ p.id }}">
-                            </td>
-                            <td>
-                                <input type="number" step="0.1" class="form-control" name="weight[]">
-                            </td>
-                            <td>
-                                <input type="number" step="0.1" class="form-control" name="temperature[]"
-                                       id="temp_{{ loop.index }}" oninput="checkRowFever({{ loop.index }})">
-                            </td>
-                            <td>
-                                <input type="text" class="form-control bg-light text-muted"
-                                       id="note_{{ loop.index }}" value="Bình thường" readonly>
-                            </td>
-                        </tr>
-                    {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        </form>
+<div class="card shadow-sm border-0">
+    <div class="card-header bg-white pb-0 d-flex justify-content-between align-items-center">
+        <h5 class="mt-2 fw-bold">Ghi nhận sức khỏe hằng ngày</h5>
     </div>
+    <form action="/save-all-health" method="POST"
+          onsubmit="return confirm('Xác nhận lưu thông tin sức khỏe của học sinh trong ngày hôm nay?');">
+        <div class="row p-3 align-items-end">
+            <div class="col-md-4">
+                <label for="recordDate" class="form-label fw-semibold text-muted mb-2">Ngày ghi nhận</label>
+                <input type="date" class="form-control" id="recordDate" name="record_date" required>
+            </div>
+            <div class="col-auto d-flex align-items-center gap-3 ms-auto">
+                <span class="fs-6">
+                    Lớp: <strong
+                        class="Bold">{{ current_user.classroom.name if current_user.classroom else 'Tất cả' }}</strong>
+                </span>
+                {% if current_user.is_authenticated and current_user.role.name == 'USER' %}
+                <div>
+                    {% if current_user.is_authenticated and current_user.role.name == 'USER' %}
+                    <button type="submit" class="btn btn-success">Lưu thông tin</button>
+                    {% else %}
+                    <button type="submit" class="btn btn-secondary" disabled>Chỉ giáo viên mới được nhập</button>
+                    {% endif %}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        <div class="card-body">
+            <table class="table table-bordered table-hover mt-2">
+                <thead class="table-light">
+                <tr>
+                    <th>STT</th>
+                    <th>Họ tên trẻ</th>
+                    <th>Cân nặng (kg)</th>
+                    <th>Nhiệt độ</th>
+                    <th>Ghi chú</th>
+                </tr>
+                </thead>
+                <tbody>
+                <!-- Vòng lặp -->
+                {% for p in students %}
+                <tr>
+                    <td>{{ loop.index }}</td>
+                    <td>
+                        {{ p.name }}
+                        <input type="hidden" name="student_id[]" value="{{ p.id }}">
+                    </td>
+                    <td>
+                        <input type="number" step="0.1" class="form-control" name="weight[]">
+                    </td>
+                    <td>
+                        <input type="number" step="0.1" class="form-control" name="temperature[]"
+                               id="temp_{{ loop.index }}" oninput="checkRowFever({{ loop.index }})">
+                    </td>
+                    <td>
+                        <input type="text" class="form-control bg-light text-muted"
+                               id="note_{{ loop.index }}" value="Bình thường" readonly>
+                    </td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </form>
+</div>
 
-    <script>
-        function checkRowFever(index) {
-            // Lấy ô nhập nhiệt độ và ô ghi chú của dòng tương ứng
-            const tempInput = document.getElementById('temp_' + index);
-            const noteInput = document.getElementById('note_' + index);
-            const temp = parseFloat(tempInput.value);
+<script>
+    function checkRowFever(index) {
+        const tempInput = document.getElementById('temp_' + index);
+        const noteInput = document.getElementById('note_' + index);
+        const temp = parseFloat(tempInput.value);
 
-            // Kiểm tra nếu nhiệt độ > 37.5
-            if (!isNaN(temp) && temp > 37.5) {
-                noteInput.value = "Cảnh báo sốt";
-                // Đổi màu chữ sang đỏ, in đậm và nền hồng nhạt (class của Bootstrap)
-                noteInput.classList.remove("text-muted", "bg-light");
-                noteInput.classList.add("text-danger", "fw-bold", "bg-danger-subtle");
-            } else {
-                noteInput.value = "Bình thường";
-                // Trả lại màu xám mặc định
-                noteInput.classList.remove("text-danger", "fw-bold", "bg-danger-subtle");
-                noteInput.classList.add("text-muted", "bg-light");
-            }
+        if (!isNaN(temp) && temp > 37.5) {
+            noteInput.value = "Cảnh báo sốt";
+            noteInput.classList.remove("text-muted", "bg-light");
+            noteInput.classList.add("text-danger", "fw-bold", "bg-danger-subtle");
+        } else {
+            noteInput.value = "Bình thường";
+            noteInput.classList.remove("text-danger", "fw-bold", "bg-danger-subtle");
+            noteInput.classList.add("text-muted", "bg-light");
         }
-    </script>
+    }
+</script>
 {% endblock %}

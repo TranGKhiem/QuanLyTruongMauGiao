@@ -1,25 +1,54 @@
-from flask import render_template, request, redirect
+from flask import render_template, request, redirect, flash
 import dao
 from app import app, login
-from flask_login import login_user, logout_user, current_user
+from flask_login import login_user, logout_user, current_user, login_required
+from models import User,UserRole
 
 
 #============= Danh sách lớp ==================
 @app.route("/")
 def index():
-    students_list = dao.get_all_students()
-    return render_template("index.html", students=students_list)
+    if not current_user.is_authenticated:
+        return render_template("index.html", students=[])
+
+    students_list = dao.get_all_students(current_user)
+    max_students = dao.get_max_students()
+    current_count = len(students_list)
+
+    students_list = dao.get_all_students(current_user)
+    return render_template("index.html",
+                           students=students_list,
+                           max_students=max_students,
+                           current_count=current_count)
 
 
 @app.route("/add-student", methods=['POST'])
+@login_required
 def add_student_route():
+    if current_user.role != UserRole.USER:
+        return redirect("/")
+
+    max_students = dao.get_max_students()
+    current_count = dao.count_students_by_user(current_user.id)
+    if current_count >= max_students:
+        flash(f"Lớp đã đạt sĩ số tối đa ({max_students} học sinh), không thể thêm mới!", "danger")
+        return redirect("/")
+
     name = request.form.get('name')
     dob = request.form.get('dob')
     gender = request.form.get('gender')
     parent_name = request.form.get('parent_name')
     phone = request.form.get('phone')
 
-    dao.add_student(name=name, dob=dob, gender=gender, parent_name=parent_name, phone=phone)
+    dao.add_student(
+        name=name,
+        dob=dob,
+        gender=gender,
+        parent_name=parent_name,
+        phone=phone,
+        user_id=current_user.id,
+        classroom_id=current_user.classroom_id
+    )
 
     return redirect("/")
 
@@ -60,12 +89,15 @@ def logout():
 #============= Sức khỏe ==================
 @app.route("/health")
 def health():
-    students_list = dao.get_all_students()
+    students_list = dao.get_all_students(current_user)
     return render_template("health.html", students=students_list)
 
 
 @app.route('/save-all-health', methods=['POST'])
 def save_all_health():
+    if current_user.role != UserRole.USER:
+        return redirect("/health")
+
     record_date = request.form.get('record_date')
     student_ids = request.form.getlist('student_id[]')
     weights = request.form.getlist('weight[]')
